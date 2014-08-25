@@ -1,4 +1,22 @@
 #! /usr/bin/env bash
+# -*- mode: shell; tab-width: 2; sublime-rulers: [100]; -*-
+
+set -o nounset # disallow usage of unset variables
+set -o errexit # exit on errors
+
+# Exit the script, requires first argument to be the exit code, and then you can pass a string that
+# will be shown to the user.
+script_exit ()
+{
+	local retval=$1
+	shift 1
+	echo "Exiting: $*"
+	exit "$retval"
+}
+trap script_exit SIGTERM
+
+# As we're installing packages and changing system settings let's require root permissions
+test "$(id -u)" != 0 && script_exit 1 "Not running as 'root'!"
 
 # Installing both master and minion, but we wait with starting the daemons
 curl -L https://bootstrap.saltstack.com -o bootstrap-salt.sh
@@ -24,20 +42,20 @@ MINION
 
 cat << MASTER > /etc/salt/master
 file_roots:
-  base:
-    - /srv/salt
-    - /srv/formulas/salt-formula
+	base:
+		- /srv/salt
+		- /srv/formulas/salt-formula
 
 pillar_roots:
-  base:
-    - /srv/pillar
+	base:
+		- /srv/pillar
 MASTER
 
 cat << TOP > /srv/salt/top.sls
 base:
-  '$(hostname -f)':
-    - salt.master
-    - salt.minon
+	'$(hostname -f)':
+		- salt.master
+		- salt.minon
 TOP
 
 
