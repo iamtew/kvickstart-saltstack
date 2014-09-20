@@ -36,9 +36,9 @@ popd
 
 
 # Let's create some basic configuration to allow the formula to do the rest
-cat << MINION > /etc/salt/minion
-master: $(hostname -f)
-MINION
+echo "master: $(hostname -f)" > /etc/salt/minion
+hostname -f > /etc/salt/minion_id
+
 
 cat << MASTER > /etc/salt/master
 file_roots:
@@ -55,7 +55,7 @@ cat << TOP > /srv/salt/top.sls
 base:
   '$(hostname -f)':
     - salt.master
-    - salt.minon
+    - salt.minion
 TOP
 
 cat << SALT > /srv/pillar/salt.sls
@@ -79,3 +79,5 @@ SALT
 /sbin/service salt-master start
 /sbin/service salt-minion start
 
+# Accept the key
+salt-key --accept="$(hostname -f)" --yes
