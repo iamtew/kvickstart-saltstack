@@ -26,7 +26,8 @@ curl -L https://bootstrap.saltstack.com -o bootstrap-salt.sh
 sh bootstrap-salt.sh -X stable
 
 # Let's create some basic configuration to allow the formula to do the rest
-echo "master: $master" > /etc/salt/minion
+mkdir -p /etc/salt/minion.d
+echo "master: $master" > /etc/salt/minion.d/minion
 hostname -f > /etc/salt/minion_id
 
 # Start our daemons

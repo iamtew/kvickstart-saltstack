@@ -26,21 +26,22 @@ sh bootstrap-salt.sh -M -X stable
 yum -y install git
 
 # Create some directories we need
-mkdir -p /srv/{salt,pillar,formulas}
+mkdir -p /etc/salt/{master,minion}.d
+mkdir -p /srv/saltstack/{salt,pillar,formulas}
 
 
 # Download the 'Salting the Salt Master' formula
-pushd /srv/formulas
+pushd /srv/saltstack/formulas
 git clone https://github.com/saltstack-formulas/salt-formula
 popd
 
 
 # Let's create some basic configuration to allow the formula to do the rest
-echo "master: $(hostname -f)" > /etc/salt/minion
+echo "master: $(hostname -f)" > /etc/salt/minion.d/minion
 hostname -f > /etc/salt/minion_id
 
 
-cat << MASTER > /etc/salt/master
+cat << MASTER > /etc/salt/master.d/master
 file_roots:
   base:
     - /srv/salt
@@ -79,5 +80,6 @@ SALT
 /sbin/service salt-master start
 /sbin/service salt-minion start
 
-# Accept the key
+# Sleep for a bit and accept the key
+sleep 5
 salt-key --accept="$(hostname -f)" --yes
