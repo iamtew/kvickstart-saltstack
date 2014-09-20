@@ -23,8 +23,11 @@ test $# != 1 && script_exit 1 "Need a master server as input!" || master=$1
 
 # Installing both master and minion, but we wait with starting the daemons
 curl -L https://bootstrap.saltstack.com -o bootstrap-salt.sh
-sh bootstrap-salt.sh -M -X stable
+sh bootstrap-salt.sh -X stable
 
 # Let's create some basic configuration to allow the formula to do the rest
 echo "master: $master" > /etc/salt/minion
 hostname -f > /etc/salt/minion_id
+
+# Start our daemons
+/sbin/service salt-minion start
