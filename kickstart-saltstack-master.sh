@@ -37,27 +37,43 @@ popd
 
 # Let's create some basic configuration to allow the formula to do the rest
 cat << MINION > /etc/salt/minion
-master: 127.0.0.1
+master: $(hostname -f)
 MINION
 
 cat << MASTER > /etc/salt/master
 file_roots:
-	base:
-		- /srv/salt
-		- /srv/formulas/salt-formula
+  base:
+    - /srv/salt
+    - /srv/formulas/salt-formula
 
 pillar_roots:
-	base:
-		- /srv/pillar
+  base:
+    - /srv/pillar
 MASTER
 
 cat << TOP > /srv/salt/top.sls
 base:
-	'$(hostname -f)':
-		- salt.master
-		- salt.minon
+  '$(hostname -f)':
+    - salt.master
+    - salt.minon
 TOP
 
+cat << SALT > /srv/pillar/salt.sls
+salt:
+  master:
+    worker_threads: 2
+    fileserver_backend:
+      - roots
+    file_roots:
+      base:
+        - /srv/salt
+        - /srv/formulas/salt-formula
+    pillar_roots:
+      base:
+        - /srv/pillar
+  minion:
+    master: localhost
+SALT
 
 # Start our daemons
 /sbin/service salt-master start
