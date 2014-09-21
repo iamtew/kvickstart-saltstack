@@ -22,7 +22,7 @@ test "$UID" != 0 && script_exit 1 "Not running as 'root'!"
 
 # Installing both master and minion, but we wait with starting the daemons
 curl -o install_salt.sh -L https://bootstrap.saltstack.com
-sh install_salt.sh -M -X "$SALT_VERSION"
+sh install_salt.sh -M -X $SALT_VERSION
 
 # We need git, so let's install it
 yum -y install git
@@ -46,22 +46,22 @@ hostname -f > /etc/salt/minion_id
 cat << MASTER > /etc/salt/master
 file_roots:
   base:
-    - /srv/salt
-    - /srv/formulas/salt-formula
+    - /srv/saltstack/salt
+    - /srv/saltstack/formulas/salt-formula
 
 pillar_roots:
   base:
-    - /srv/pillar
+    - /srv/saltstack/pillar
 MASTER
 
-cat << TOP > /srv/salt/top.sls
+cat << TOP > /srv/saltstack/salt/top.sls
 base:
   '$HOSTNAME':
     - salt.master
     - salt.minion
 TOP
 
-cat << SALT > /srv/pillar/salt.sls
+cat << SALT > /srv/saltstack/pillar/salt.sls
 salt:
   master:
     worker_threads: 2
@@ -69,11 +69,11 @@ salt:
       - roots
     file_roots:
       base:
-        - /srv/salt
-        - /srv/formulas/salt-formula
+        - /srv/saltstack/salt
+        - /srv/saltstack/formulas/salt-formula
     pillar_roots:
       base:
-        - /srv/pillar
+        - /srv/saltstack/pillar
   minion:
     master: localhost
 SALT
