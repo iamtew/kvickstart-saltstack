@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 # -*- mode: shell; tab-width: 2; sublime-rulers: [100]; -*-
 
+SALT_VERSION='git v2014.7.0rc2'
+
 set -o nounset # disallow usage of unset variables
 set -o errexit # exit on errors
 
@@ -16,19 +18,19 @@ script_exit ()
 trap script_exit SIGTERM
 
 # As we're installing packages and changing system settings let's require root permissions
-test "$(id -u)" != 0 && script_exit 1 "Not running as 'root'!"
+test "$UID" != 0 && script_exit 1 "Not running as 'root'!"
 
 # First and only input will be treated as a master server hostname
-test $# != 1 && script_exit 1 "Need a master server as input!" || master=$1
+test $# != 1 && script_exit 1 "Need a master server as input!" || OPT_MASTER=$1
 
 # Installing both master and minion, but we wait with starting the daemons
-curl -L https://bootstrap.saltstack.com -o bootstrap-salt.sh
-sh bootstrap-salt.sh -X stable
+curl -o install_salt.sh -L https://bootstrap.saltstack.com
+sh install_salt.sh -X "$SALT_VERSION"
 
 # Let's create some basic configuration to allow the formula to do the rest
 mkdir -p /etc/salt/minion.d
-echo "master: $master" > /etc/salt/minion.d/minion
-hostname -f > /etc/salt/minion_id
+echo "master: $OPT_MASTER" > /etc/salt/minion
+echo "$HOSTNAME" > /etc/salt/minion_id
 
 # Start our daemons
 /sbin/service salt-minion start

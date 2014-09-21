@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 # -*- mode: shell; tab-width: 2; sublime-rulers: [100]; -*-
 
+SALT_VERSION='git v2014.7.0rc2'
+
 set -o nounset # disallow usage of unset variables
 set -o errexit # exit on errors
 
@@ -16,11 +18,11 @@ script_exit ()
 trap script_exit SIGTERM
 
 # As we're installing packages and changing system settings let's require root permissions
-test "$(id -u)" != 0 && script_exit 1 "Not running as 'root'!"
+test "$UID" != 0 && script_exit 1 "Not running as 'root'!"
 
 # Installing both master and minion, but we wait with starting the daemons
-curl -L https://bootstrap.saltstack.com -o bootstrap-salt.sh
-sh bootstrap-salt.sh -M -X stable
+curl -o install_salt.sh -L https://bootstrap.saltstack.com
+sh install_salt.sh -M -X "$SALT_VERSION"
 
 # We need git, so let's install it
 yum -y install git
@@ -37,11 +39,11 @@ popd
 
 
 # Let's create some basic configuration to allow the formula to do the rest
-echo "master: $(hostname -f)" > /etc/salt/minion.d/minion
+echo "master: $HOSTNAME" > /etc/salt/minion
 hostname -f > /etc/salt/minion_id
 
 
-cat << MASTER > /etc/salt/master.d/master
+cat << MASTER > /etc/salt/master
 file_roots:
   base:
     - /srv/salt
@@ -54,7 +56,7 @@ MASTER
 
 cat << TOP > /srv/salt/top.sls
 base:
-  '$(hostname -f)':
+  '$HOSTNAME':
     - salt.master
     - salt.minion
 TOP
@@ -82,4 +84,4 @@ SALT
 
 # Sleep for a bit and accept the key
 sleep 5
-salt-key --accept="$(hostname -f)" --yes
+salt-key --accept="$HOSTNAME" --yes
