@@ -25,12 +25,5 @@ test $# != 1 && script_exit 1 "Need a master server as input!" || OPT_MASTER=$1
 
 # Installing both master and minion, but we wait with starting the daemons
 curl -o install_salt.sh -L https://bootstrap.saltstack.com
-sh install_salt.sh -X $SALT_VERSION
+sh install_salt.sh -A "$OPT_MASTER" -X $SALT_VERSION
 
-# Let's create some basic configuration to allow the formula to do the rest
-mkdir -p /etc/salt/minion.d
-echo "master: $OPT_MASTER" > /etc/salt/minion
-echo "$HOSTNAME" > /etc/salt/minion_id
-
-# Start our daemons
-/sbin/service salt-minion start
