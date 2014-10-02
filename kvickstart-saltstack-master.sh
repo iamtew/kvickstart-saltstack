@@ -22,7 +22,7 @@ test "$UID" != 0 && script_exit 1 "Not running as 'root'!"
 
 # Installing both master and minion, but we wait with starting the daemons
 curl -o install_salt.sh -L https://bootstrap.saltstack.com
-sh install_salt.sh -M -X $SALT_VERSION
+sh install_salt.sh -M -X -P $SALT_VERSION
 
 # We need git, so let's install it
 yum -y install git
